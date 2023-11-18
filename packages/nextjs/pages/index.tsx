@@ -44,6 +44,7 @@ function WalletInfo() {
         <p>Connected to the network {chain?.name}</p>
         <WalletAction></WalletAction>
         <WalletBalance address={address as `0x${string}`}></WalletBalance>
+        <TokenInfo address={address as `0x${string}`}></TokenInfo>
         <ApiData address={address as `0x${string}`}></ApiData>
       </div>
     );
@@ -118,21 +119,22 @@ function WalletBalance(params: { address: `0x${string}` }) {
     </div>
   );
 }
+
 function TokenInfo(params: { address: `0x${string}` }) {
   return (
     <div className="card w-96 bg-primary text-primary-content mt-4">
       <div className="card-body">
         <h2 className="card-title">Testing useContractRead wagmi hook</h2>
-        <TokenName></TokenName>
+        <TokenName address={params.address}></TokenName>
         <TokenBalance address={params.address}></TokenBalance>
       </div>
     </div>
   );
 }
 
-function TokenName() {
+function TokenName(params: { address: `0x${string}` }) {
   const { data, isError, isLoading } = useContractRead({
-    address: "0x37dBD10E7994AAcF6132cac7d33bcA899bd2C660",
+    address: params.address,
     abi: [
       {
         constant: true,
@@ -161,7 +163,7 @@ function TokenName() {
 
 function TokenBalance(params: { address: `0x${string}` }) {
   const { data, isError, isLoading } = useContractRead({
-    address: "0x37dBD10E7994AAcF6132cac7d33bcA899bd2C660",
+    address: params.address,
     abi: [
       {
         constant: true,
@@ -193,6 +195,7 @@ function TokenBalance(params: { address: `0x${string}` }) {
   if (isError) return <div>Error fetching balance</div>;
   return <div>Balance: {balance}</div>;
 }
+
 function ApiData(params: { address: `0x${string}` }) {
   return (
     <div className="card w-96 bg-primary text-primary-content mt-4">
@@ -202,6 +205,7 @@ function ApiData(params: { address: `0x${string}` }) {
         <p>post method</p>
         <TokenAddressFromApi></TokenAddressFromApi>
         <RequestTokens address={params.address}></RequestTokens>
+        <SelfDelegate address={params.address}></SelfDelegate>
       </div>
     </div>
   );
@@ -229,12 +233,13 @@ function TokenAddressFromApi() {
     </div>
   );
 }
+
 function RequestTokens(params: { address: string }) {
   const [data, setData] = useState<{ result: boolean }>();
   const [isLoading, setLoading] = useState(false);
 
-  //const body = { address: params.address, value: "123" };
-  const body = { address: "0xE30B0e8ee4c8BA5Ff81368f0A069DC04548dFCb3", value: "1" };
+  const body = { address: params.address, value: "1" };
+  // const body = { address: "0xE30B0e8ee4c8BA5Ff81368f0A069DC04548dFCb3", value: "1" };
 
   if (isLoading) return <p>Requesting tokens from API...</p>;
   if (!data)
@@ -262,6 +267,42 @@ function RequestTokens(params: { address: string }) {
   return (
     <div>
       <p>Result from API: {data.result ? "worked" : "failed"}</p>
+    </div>
+  );
+}
+
+function SelfDelegate(params: { address: string }) {
+  const [data, setData] = useState<{ result: boolean }>();
+  const [isLoading, setLoading] = useState(false);
+
+  const body = { address: params.address };
+
+  if (isLoading) return <p>Self-Delegation from API...</p>;
+  if (!data)
+    return (
+      <button
+        className="btn btn-active btn-neutral"
+        onClick={() => {
+          setLoading(true);
+          fetch("http://localhost:3001/self-delegate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          })
+            .then(res => res.json())
+            .then(data => {
+              setData(data);
+              setLoading(false);
+            });
+        }}
+      >
+        Self-Delegate Voting Power
+      </button>
+    );
+
+  return (
+    <div>
+      <p>Self-Delegation result from API: {data.result ? "worked" : "failed"}</p>
     </div>
   );
 }
