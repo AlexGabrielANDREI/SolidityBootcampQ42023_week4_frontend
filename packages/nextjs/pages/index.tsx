@@ -207,6 +207,7 @@ function ApiData(params: { address: `0x${string}` }) {
         {/* <TokenAddressFromApi></TokenAddressFromApi>
         <p>post method</p> */}
         <TokenAddressFromApi></TokenAddressFromApi>
+        <VotingPower address={params.address}></VotingPower>
         <RequestTokens address={params.address}></RequestTokens>
         <SelfDelegate address={params.address}></SelfDelegate>
       </div>
@@ -233,6 +234,29 @@ function TokenAddressFromApi() {
   return (
     <div>
       <p>Token address from API: {data.result}</p>
+    </div>
+  );
+}
+
+function VotingPower(params: { address: `0x${string}` }) {
+  const [data, setData] = useState<{ result: string }>();
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/get-votingPower/" + params.address)
+      .then(res => res.json())
+      .then(data => {
+        setData(data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <p>Loading voting power from API...</p>;
+  if (!data) return <p>No voting power information</p>;
+
+  return (
+    <div>
+      <p>Voting power: {data.result}</p>
     </div>
   );
 }
