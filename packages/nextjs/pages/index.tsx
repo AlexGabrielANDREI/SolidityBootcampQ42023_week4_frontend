@@ -360,7 +360,8 @@ function Vote() {
   const [votingAmount, setVotingAmount] = useState("");
   const [data, setData] = useState<{ result: boolean }>();
   const [isLoading, setLoading] = useState(false);
-
+  const [isVotingSuccesfull, setVotingStatus] = useState(false);
+  const [hashValue, setHashValue] = useState("");
   if (!data)
     return (
       <div className="flex items-center flex-col flex-grow">
@@ -399,6 +400,10 @@ function Vote() {
                 console.log(`body: ${{ proposalNumber: votingProposalIndex, amount: votingAmount }}`);
                 setData(data);
                 setLoading(false);
+                if (data.result.success) {
+                  setHashValue(data.result.transactionHash);
+                  setVotingStatus(true);
+                }
               });
           }}
         >
@@ -409,7 +414,11 @@ function Vote() {
 
   return (
     <div>
-      <p>Result from API: {data.result ? "worked" : "failed"}</p>
+      <p>
+        {isVotingSuccesfull
+          ? "Voted succesfull , transaction hash: " + hashValue
+          : "Please check if you have voting power  "}
+      </p>
     </div>
   );
 }
