@@ -3,6 +3,8 @@ import type { NextPage } from "next";
 import { useAccount, useBalance, useNetwork, useSignMessage } from "wagmi";
 import { useContractRead } from "wagmi";
 
+let len = 0;
+
 const Home: NextPage = () => {
   return (
     <>
@@ -46,6 +48,7 @@ function WalletInfo() {
         <WalletBalance address={address as `0x${string}`}></WalletBalance>
         <TokenInfo address={address as `0x${string}`}></TokenInfo>
         <ApiData address={address as `0x${string}`}></ApiData>
+        <Voting></Voting>
       </div>
     );
   if (isConnecting)
@@ -201,8 +204,8 @@ function ApiData(params: { address: `0x${string}` }) {
     <div className="card w-96 bg-primary text-primary-content mt-4">
       <div className="card-body">
         <h2 className="card-title">Testing API Coupling</h2>
-        <TokenAddressFromApi></TokenAddressFromApi>
-        <p>post method</p>
+        {/* <TokenAddressFromApi></TokenAddressFromApi>
+        <p>post method</p> */}
         <TokenAddressFromApi></TokenAddressFromApi>
         <RequestTokens address={params.address}></RequestTokens>
         <SelfDelegate address={params.address}></SelfDelegate>
@@ -303,6 +306,110 @@ function SelfDelegate(params: { address: string }) {
   return (
     <div>
       <p>Self-Delegation result from API: {data.result ? "worked" : "failed"}</p>
+    </div>
+  );
+}
+
+function Voting() {
+  return (
+    <div className="card w-96 bg-primary text-primary-content mt-4">
+      <div className="card-body">
+        <h2 className="card-title">Voting</h2>
+        <Proposals></Proposals>
+        <br></br>
+        <Vote></Vote>
+      </div>
+    </div>
+  );
+}
+
+function Proposals() {
+  const [data, setData] = useState<{ result: string[] }>();
+  const [isLoading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/get-proposals")
+      .then(res => res.json())
+      .then(data => {
+        setData(data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return;
+  <p>Loading proposals...</p>;
+
+  if (!data) return <p>No proposals information</p>;
+
+  len = data.result.length - 1;
+
+  return (
+    <div className="flex items-center flex-col flex-grow">
+      <h2 className="card-title">Proposals</h2>
+      <ul>
+        {data.result.map((proposal, index) => (
+          <li key={index}>{proposal}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function Vote() {
+  const [votingProposalIndex, setVotingProposalIndex] = useState("");
+  const [votingAmount, setVotingAmount] = useState("");
+  const [data, setData] = useState<{ result: boolean }>();
+  const [isLoading, setLoading] = useState(false);
+
+  if (!data)
+    return (
+      <div className="flex items-center flex-col flex-grow">
+        <h2 className="card-title">Vote</h2>
+        <div className="form-control w-full max-w-xs my-4">
+          <input
+            type="number"
+            min="0"
+            max={len}
+            placeholder="Type here the chosen porposal index"
+            className="input input-bordered w-full max-w-xs"
+            value={votingProposalIndex}
+            onChange={e => setVotingProposalIndex(e.target.value)}
+          />
+          <br></br>
+          <input
+            type="number"
+            placeholder="Type here the amount of token to vote"
+            className="input input-bordered w-full max-w-xs"
+            value={votingAmount}
+            onChange={e => setVotingAmount(e.target.value)}
+          />
+        </div>
+        <button
+          className="btn btn-active btn-neutral"
+          disabled={isLoading}
+          onClick={() => {
+            setLoading(true);
+            fetch("http://localhost:3001/vote", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ proposalNumber: votingProposalIndex, amount: votingAmount }),
+            })
+              .then(res => res.json())
+              .then(data => {
+                console.log(`body: ${{ proposalNumber: votingProposalIndex, amount: votingAmount }}`);
+                setData(data);
+                setLoading(false);
+              });
+          }}
+        >
+          Vote
+        </button>
+      </div>
+    );
+
+  return (
+    <div>
+      <p>Result from API: {data.result ? "worked" : "failed"}</p>
     </div>
   );
 }
