@@ -48,6 +48,7 @@ function WalletInfo() {
         <WalletBalance address={address as `0x${string}`}></WalletBalance>
         <TokenInfo address={address as `0x${string}`}></TokenInfo>
         <ApiData address={address as `0x${string}`}></ApiData>
+        <WinningProposalData address={address as `0x${string}`}></WinningProposalData>
         <Voting></Voting>
       </div>
     );
@@ -446,6 +447,113 @@ function Vote() {
           ? "Voted succesfull , transaction hash: " + hashValue
           : "Please check if you have voting power  "}
       </p>
+    </div>
+  );
+}
+
+function WinningProposalData(params: { address: `0x${string}` }) {
+  return (
+    <div className="card w-96 bg-primary text-primary-content mt-4">
+      <div className="card-body">
+      <h2 className="card-title">Winning Proposal Data From API:</h2>
+      <Opt1Api></Opt1Api>
+      <Opt2Api></Opt2Api>
+      <Opt3Api></Opt3Api>
+      <WinningProposal></WinningProposal>
+      </div>
+    </div>
+  );
+}
+
+function Opt1Api() {
+  const [data, setData] = useState<{ result: string }>();
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/opt1")
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <p>Loading Opt1 from API...</p>;
+  if (!data) return <p>Sorry, No Opt1 Information</p>;
+
+  return (
+    <div>
+      {data.result['Option']}: {data.result['Total Votes']} votes
+    </div>
+  );
+
+}
+
+function Opt2Api() {
+  const [data, setData] = useState<{ result: string }>();
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/opt2")
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <p>Loading Opt2 from API...</p>;
+  if (!data) return <p>Sorry, No Opt2 Information</p>;
+
+  return (
+    <div>
+      {data.result['Option']}: {data.result['Total Votes']} votes
+    </div>
+  );
+}
+
+function Opt3Api() {
+  const [data, setData] = useState<{ result: string }>();
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/opt3")
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <p>Loading Opt3 from API...</p>;
+  if (!data) return <p>Sorry, No Opt3 Information</p>;
+
+  return (
+    <div>
+      {data.result['Option']}: {data.result['Total Votes']} votes
+    </div>
+  );
+}
+
+function WinningProposal() {
+  const [data, setData] = useState<{ result: string }>();
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/winner-name")
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (isLoading) return <p>Loading Winning Proposal from API...</p>;
+  if (!data) return <p>Sorry, No Winnning Proposal Information</p>;
+
+  return (
+    <div>
+      The Winning Proposal Is: {data.result}
     </div>
   );
 }
