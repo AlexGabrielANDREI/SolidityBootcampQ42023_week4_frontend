@@ -403,6 +403,9 @@ function Vote() {
           <br></br>
           <input
             type="number"
+            min="0.001"
+            step="0.001"
+            max="1.000"
             placeholder="Type here the amount of token to vote"
             className="input input-bordered w-full max-w-xs"
             value={votingAmount}
